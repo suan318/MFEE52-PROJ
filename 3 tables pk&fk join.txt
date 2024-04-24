@@ -1,0 +1,37 @@
+create table ports(
+id int(10),
+embarked varchar(5),
+city varchar(20),
+primary key(id)
+);
+create table sudent(
+id int primary key,
+namess varchar(20)
+);
+insert into sudent(id,namess)
+values(1,'jack');
+show warnings;
+select * from sudent;
+
+create table lesson(
+id int primary key,
+namess varchar(20)
+);
+insert into lesson(id,namess)
+values(1,'english');
+select * from lesson;
+
+create table sshow_lesson(
+id int primary key,
+sudent_id  int,
+lesson_id int,
+foreign key (sudent_id)REFERENCES sudent(id),
+foreign key (lesson_id)REFERENCES lesson(id)
+);
+INSERT INTO sshow_lesson(id, sudent_id, lesson_id)
+VALUES(1, 1, 1);
+
+SELECT s.namess AS student_name, l.namess AS lesson_name
+FROM sshow_lesson sl
+JOIN sudent s ON sl.sudent_id = s.id
+JOIN lesson l ON sl.lesson_id = l.id;
