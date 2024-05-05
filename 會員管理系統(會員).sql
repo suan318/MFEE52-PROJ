@@ -1,66 +1,73 @@
 use my_project;
 -- 會員部分
-create table members(
-m_id int not null primary key auto_increment,
-m_name varchar(10),
-m_email varchar(100) not null unique,-- 註冊用的email不可重複
-m_password varchar(70) not null
+create table Members(
+member_id int not null primary key auto_increment,
+member_name varchar(10),
+member_email varchar(100) not null unique,-- 註冊用的email不可重複
+member_password varchar(70) not null
 );
-create table members_detail(
-md_id int not null primary key auto_increment,
+create table MemberDetail(
+memberdetail_id_fk int not null primary key auto_increment,
 gender varchar(10),
 nick_name varchar(10),
-img_url varchar(200) not null default 'default avatar',-- 可以不放大頭貼，若不放會顯示一個預設圖示
-address varchar(500),
-mobile int null,-- 要驗證時需指定用戶輸入的格式(避免0900-000-000)
-created_date timestamp default current_timestamp,
-updatde_date timestamp default current_timestamp on update current_timestamp,
-foreign key(md_id) references members(m_id) on delete cascade-- 基本表被刪,細節表內同筆id也被刪
+memberdetail_img_url varchar(200) not null default 'default avatar',-- 可以不放大頭貼，若不放會顯示一個預設圖示
+memberdetail_address varchar(500),
+memberdetail_mobile int null,-- 要驗證時需指定用戶輸入的格式(避免0900-000-000)
+memberdetail_created_date timestamp default current_timestamp,
+memberdetail_update_at timestamp default current_timestamp on update current_timestamp,
+foreign key(memberdetail_id_fk) references Members(member_id) on delete cascade-- 基本表被刪,細節表內同筆id也被刪
 );
+
+
+
 -- 會員與他的功能關聯表
-create table members_functions(
-md_id int not null,
-f_id int not null,
-primary key (md_id, f_id),
-foreign key (md_id) references members_detail(md_id) on delete cascade
-);
- -- drop table members;
--- drop table members_detail;
--- drop table members_functions;
-show warnings;
--- 填入資料 members
-insert into members(m_name,m_email,m_password)
+create table MemberFunctions(
+memberfunctions_id_fk int not null,
+memberfunctions_code_type varchar(50) not null,
+memberfunctions_code_type_id varchar(50) not null,
+foreign key (memberfunctions_id_fk) references MemberDetail(memberdetail_id_fk) on delete cascade
+ );
+ show warnings;
+ 
+-- drop table Members;
+ -- drop table MemberDetail;
+ -- drop table MemberFunctions;
+
+-- 填入資料 Members
+insert into Members(member_name,member_email,member_password)
 values
 ('劉冠廷','dongdong123456@gmail.com','password'),
 ('王淨','lulu123456@gmail.com','password'),
 ('隋棠','meng123456@gmail.com','password'),
 ('溫昇豪','hao123456@gmail.com','password'),
 ('魏蔓','manman123456@gmail.com','password');
--- 填入資料 members_detail
-insert into members_detail(gender,nick_name,img_url,address,mobile)
+-- 填入資料 MemberDetail
+insert into MemberDetail(gender,nick_name,memberdetail_img_url,memberdetail_address,memberdetail_mobile)
 values
 ('male','東東','thisisaphotourl','台北市大安區敦化南路一段100號','0943851740'),
 ('female','路路','thisisaphotourl','新北市板橋區中山路二段50號','0910755391'),
 ('female','','thisisaphotourl','台中市西區民生路三段200號','0978109552'),
 ('female','','','桃園市中壢區中正路五段400號','0953211710'),
 ('female','','','高雄市左營區明誠路四段300號','0936412338');
--- -- 填入資料 會員與權限的關聯  功能id 3=讀取 4=更新 5=刪除
-select * from members_detail;
-insert into members_functions(md_id,f_id)
+
+
+-- -- 填入資料 MemberFunctions  對應到的 code_type='functions', code_type_id '03'讀取 '04'更新 '05'刪除
+select * from MemberDetail;
+insert into MemberFunctions(memberfunctions_id_fk,memberfunctions_code_type,memberfunctions_code_type_id)
 values
-(1,3),(1,4),(1,5),
-(2,3),(2,4),(2,5),
-(3,3),(3,4),(3,5),
-(4,3),(4,4),(4,5),
-(5,3),(5,4),(5,5);
-select * from members_functions;
+(1,'functions','03'),(1,'functions','04'),(1,'functions','05'),
+(2,'functions','03'),(2,'functions','04'),(2,'functions','05'),
+(3,'functions','03'),(3,'functions','04'),(3,'functions','05'),
+(4,'functions','03'),(4,'functions','04'),(4,'functions','05'),
+(5,'functions','03'),(5,'functions','04'),(5,'functions','05');
+select * from MemberFunctions;
 
 -- join
 select *
-from members_detail
-join members on members_detail.md_id = members.m_id
-join members_functions on members_detail.md_id = members_functions.md_id
-join functions on members_functions.f_id = functions.f_id;
+from MemberDetail
+join Members on MemberDetail.memberdetail_id_fk = Members.member_id
+join  MemberFunctions on MemberDetail.memberdetail_id_fk = MemberFunctions.memberfunctions_id_fk
+join CommonCode on CommonCode.code_type_id = MemberFunctions.memberfunctions_code_type_id;
 
 
 -- test 我的最愛
