@@ -6,88 +6,73 @@ member_name varchar(10),
 member_email varchar(100) not null unique,-- 註冊用的email不可重複
 member_password varchar(70) not null
 );
--- 總表測試
-Create table commonType(
-CommonPkey int primary key auto_increment,
-CodeType Varchar(5),  -- x&y
-commonType_code int,-- 01台北市
-CodeTypeDesc Varchar(10),
-Code_remark int
-);
--- 建立總表資料測試
-insert into commonType(CodeType,commonType_code,CodeTypeDesc)
-values
-('x',1,'台北市');
-
-insert into commonType(CodeType,commonType_code,CodeTypeDesc,Code_remark)
-values
-('y',1,'大安區',1);
-select * from commonType;
-
-
-
 create table MemberDetail(
 memberdetail_id_fk int not null primary key auto_increment,
 gender varchar(10),
 nick_name varchar(10),
-memberdetail_img_url varchar(200) not null default 'default avatar',-- 可以不放大頭貼，若不放會顯示一個預設圖示
-memberdetail_address_id int, -- foreign key
+memberdetail_imgurl varchar(200) not null default 'default avatar',-- 可以不放大頭貼，若不放會顯示一個預設圖示
+memberdetail_address varchar(500),#################資料型別還未定############################
 memberdetail_mobile int null,-- 要驗證時需指定用戶輸入的格式(避免0900-000-000)
 memberdetail_created_date timestamp default current_timestamp,
 memberdetail_update_at timestamp default current_timestamp on update current_timestamp,
-foreign key(memberdetail_id_fk) references Members(member_id) on delete cascade,-- 基本表被刪,細節表內同筆id也被刪
-foreign key(memberdetail_address_id) references commonType(CommonPkey) on delete cascade
+foreign key(memberdetail_id_fk) references Members(member_id) on delete cascade-- 基本表被刪,細節表內同筆id也被刪
 );
+########################會員與他的功能關聯表 舊版
+create table MemberFunctions(
+md_id int not null,
+f_id int not null,
+primary key (md_id, f_id),
+foreign key (md_id) references members_detail(md_id) on delete cascade
+);
+########################會員與他的功能關聯表 舊版
+#######會員與他的功能關聯表 新版
+create table MemberFunctions(
+memberfunctions_id_fk int not null,
+memberfunctions_code_type varchar(50) not null,
+memberfunctions_code_type_id varchar(50) not null,
+foreign key (memberfunctions_id_fk) references MemberDetail(memberdetail_id_fk) on delete cascade
+ );
+ #######會員與他的功能關聯表 新版
+ -- drop table members;
+-- drop table members_detail;
+-- drop table members_functions;
 
-
--- 會員與他的功能關聯表
--- create table MemberFunctions(
--- memberfunctions_id_fk int not null,
--- memberfunctions_code_type varchar(50) not null,
--- memberfunctions_code_type_id varchar(50) not null,
--- foreign key (memberfunctions_id_fk) references MemberDetail(memberdetail_id_fk) on delete cascade
---  );
---  show warnings;
- 
--- drop table Members;
- -- drop table MemberDetail;
- -- drop table MemberFunctions;
-
--- 填入資料 Members
+-- 填入資料 members
 insert into Members(member_name,member_email,member_password)
 values
-('劉冠廷','dongdong123456@gmail.com','password');
--- ('王淨','lulu123456@gmail.com','password'),
--- ('隋棠','meng123456@gmail.com','password'),
--- ('溫昇豪','hao123456@gmail.com','password'),
--- ('魏蔓','manman123456@gmail.com','password');
--- 填入資料 MemberDetail
-insert into MemberDetail(gender,nick_name,memberdetail_img_url,memberdetail_address,memberdetail_mobile)
+('劉冠廷','dongdong123456@gmail.com','password'),
+('王淨','lulu123456@gmail.com','password'),
+('隋棠','meng123456@gmail.com','password'),
+('溫昇豪','hao123456@gmail.com','password'),
+('魏蔓','manman123456@gmail.com','password');
+##################################地址欄位可能要建一個地址表連到CommonType再串接近來
+-- 填入資料 memberdetail
+insert into MemberDetail(gender,nick_name,memberdetail_imgurl,memberdetail_address,memberdetail_mobile)
 values
-('male','東東','thisisaphotourl','敦化南路一段100號','0943851740');
--- ('female','路路','thisisaphotourl','新北市板橋區中山路二段50號','0910755391'),
--- ('female','','thisisaphotourl','台中市西區民生路三段200號','0978109552'),
--- ('female','','','桃園市中壢區中正路五段400號','0953211710'),
--- ('female','','','高雄市左營區明誠路四段300號','0936412338');
-
-
--- -- 填入資料 MemberFunctions  對應到的 code_type='functions', code_type_id '03'讀取 '04'更新 '05'刪除
--- select * from MemberDetail;
--- insert into MemberFunctions(memberfunctions_id_fk,memberfunctions_code_type,memberfunctions_code_type_id)
--- values
--- (1,'functions','03'),(1,'functions','04'),(1,'functions','05'),
--- (2,'functions','03'),(2,'functions','04'),(2,'functions','05'),
--- (3,'functions','03'),(3,'functions','04'),(3,'functions','05'),
--- (4,'functions','03'),(4,'functions','04'),(4,'functions','05'),
--- (5,'functions','03'),(5,'functions','04'),(5,'functions','05');
--- select * from MemberFunctions;
-
+('male','東東','thisisaphotourl','台北市大安區敦化南路一段100號','0943851740'),
+('female','路路','thisisaphotourl','新北市板橋區中山路二段50號','0910755391'),
+('female','','thisisaphotourl','台中市西區民生路三段200號','0978109552'),
+('female','','','桃園市中壢區中正路五段400號','0953211710'),
+('female','','','高雄市左營區明誠路四段300號','0936412338');
+#####################################
+##########################################待修改
+-- -- 填入資料 會員與權限的關聯  功能id 3=讀取 4=更新 5=刪除
+select * from members_detail;
+insert into members_functions(md_id,f_id)
+values
+(1,3),(1,4),(1,5),
+(2,3),(2,4),(2,5),
+(3,3),(3,4),(3,5),
+(4,3),(4,4),(4,5),
+(5,3),(5,4),(5,5);
+select * from members_functions;
+##########################################待修改
 -- join
 select *
-from MemberDetail
-join Members on MemberDetail.memberdetail_id_fk = Members.member_id
-join  MemberFunctions on MemberDetail.memberdetail_id_fk = MemberFunctions.memberfunctions_id_fk
-join CommonCode on CommonCode.code_type_id = MemberFunctions.memberfunctions_code_type_id;
+from members_detail
+join members on members_detail.md_id = members.m_id
+join members_functions on members_detail.md_id = members_functions.md_id
+join functions on members_functions.f_id = functions.f_id;
 
 
 -- test 我的最愛

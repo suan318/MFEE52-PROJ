@@ -1,4 +1,5 @@
 create database my_project;
+-- drop database my_project;
 use my_project;
 -- 員工部分
 create table Employees(
@@ -38,7 +39,7 @@ values(1,'employee_avatars'),(2,'employee_avatars'),(3,'employee_avatars');
 insert into EmployeeDetail(employeedetail_id_fk)
 values(4),(5);
 select * from EmployeeDetail;
-
+show warnings;
  -- 權限表
  create table Functions(
  function_id int not null primary key auto_increment,
