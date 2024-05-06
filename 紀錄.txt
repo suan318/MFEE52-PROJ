@@ -1,0 +1,146 @@
+create table MemberDetail(
+memberdetail_id_fk int not null primary key auto_increment,
+gender varchar(10),
+nick_name varchar(10),
+memberdetail_img_url varchar(200) not null default 'default avatar',-- 可以不放大頭貼，若不放會顯示一個預設圖示
+memberdetail_address varchar(500),
+memberdetail_mobile int null,-- 要驗證時需指定用戶輸入的格式(避免0900-000-000)
+memberdetail_created_date timestamp default current_timestamp,
+memberdetail_update_at timestamp default current_timestamp on update current_timestamp,
+foreign key(memberdetail_id_fk) references Members(member_id) on delete cascade-- 基本表被刪,細節表內同筆id也被刪
+);
+
+此表中memberdetail_address這個欄位的資料需要連到另一個表，要修改甚麼
+ChatGPT
+根據您的描述，MemberDetail 表中的 memberdetail_address 欄位需要連接到另一個表。這意味著您希望將地址資料分離出來，並將其存儲在一個獨立的表中，然後在 MemberDetail 表中使用外鍵將其關聯起來。
+
+這裡有兩種主要的方法可以實現這個：
+
+方法一：在MemberDetail表中添加外鍵欄位
+您可以在 MemberDetail 表中添加一個外鍵欄位，將其連接到另一個表中存儲地址資料的主鍵。這樣，您的 MemberDetail 表將看起來像這樣：
+
+sql
+Copy code
+CREATE TABLE MemberDetail (
+    memberdetail_id_fk INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    gender VARCHAR(10),
+    nick_name VARCHAR(10),
+    memberdetail_img_url VARCHAR(200) NOT NULL DEFAULT 'default avatar',
+    memberdetail_address_id INT, -- 外鍵欄位
+    memberdetail_mobile INT,
+    memberdetail_created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    memberdetail_update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (memberdetail_id_fk) REFERENCES Members(member_id) ON DELETE CASCADE,
+    FOREIGN KEY (memberdetail_address_id) REFERENCES Address(address_id) -- 外鍵參考地址表
+);
+在這種情況下，您需要創建一個名為 Address 的新表，該表存儲地址資料。然後，MemberDetail 表中的 memberdetail_address_id 欄位將是外鍵，參考 Address 表中的 address_id 主鍵。
+
+方法二：在MemberDetail表中直接存儲地址資料
+如果您認為地址資料不太可能經常發生變化，或者不需要單獨的地址表，您可以直接將地址資料存儲在 MemberDetail 表中。在這種情況下，您只需將 memberdetail_address 欄位的類型更改為適合存儲地址資料的類型，例如 VARCHAR(500)：
+
+sql
+Copy code
+CREATE TABLE MemberDetail (
+    memberdetail_id_fk INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    gender VARCHAR(10),
+    nick_name VARCHAR(10),
+    memberdetail_img_url VARCHAR(200) NOT NULL DEFAULT 'default avatar',
+    memberdetail_address VARCHAR(500), -- 直接存儲地址資料
+    memberdetail_mobile INT,
+    memberdetail_created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    memberdetail_update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (memberdetail_id_fk) REFERENCES Members(member_id) ON DELETE CASCADE
+);
+這兩種方法的選擇取決於您的具體需求和系統設計，您可以根據情況選擇最適合的方案。
+
+
+Create table commonType(
+CommonPkey int primary key auto_increment,
+CodeType Varchar(5),  -- x&y
+commonType_code int,-- 01台北市
+CodeTypeDesc Varchar(10),
+Code_remark int
+);
+-- 建立總表資料測試
+insert into commonType(CodeType,commonType_code,CodeTypeDesc)
+values
+('x',1,'台北市');
+
+insert into commonType(CodeType,commonType_code,CodeTypeDesc,Code_remark)
+values
+('y',1,'大安區',1);
+select * from commonType;
+
+
+
+create table MemberDetail(
+memberdetail_id_fk int not null primary key auto_increment,
+gender varchar(10),
+nick_name varchar(10),
+memberdetail_img_url varchar(200) not null default 'default avatar',-- 可以不放大頭貼，若不放會顯示一個預設圖示
+memberdetail_address_id int, -- foreign key
+memberdetail_mobile int null,-- 要驗證時需指定用戶輸入的格式(避免0900-000-000)
+memberdetail_created_date timestamp default current_timestamp,
+memberdetail_update_at timestamp default current_timestamp on update current_timestamp,
+foreign key(memberdetail_id_fk) references Members(member_id) on delete cascade,-- 基本表被刪,細節表內同筆id也被刪
+foreign key(memberdetail_address_id) references commonType() on delete cascade
+);
+
+MemberDetail如何取用 commonType的資料
+ChatGPT
+在 MemberDetail 表中，您可以使用 memberdetail_address_id 來參考 commonType 表中的資料，因為您在 commonType 表中建立了代表地址的記錄。在這種情況下，memberdetail_address_id 是 commonType 表的主鍵。
+
+下面是您可以將地址資料與 MemberDetail 表關聯的方法：
+
+首先，您需要確保 MemberDetail 表中的 memberdetail_address_id 欄位是一個外鍵，參考 commonType 表的主鍵 CommonPkey。
+sql
+Copy code
+CREATE TABLE MemberDetail (
+    memberdetail_id_fk INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    gender VARCHAR(10),
+    nick_name VARCHAR(10),
+    memberdetail_img_url VARCHAR(200) NOT NULL DEFAULT 'default avatar',
+    memberdetail_address_id INT, -- 外鍵欄位
+    memberdetail_mobile INT,
+    memberdetail_created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    memberdetail_update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (memberdetail_id_fk) REFERENCES Members(member_id) ON DELETE CASCADE,
+    FOREIGN KEY (memberdetail_address_id) REFERENCES commonType(CommonPkey) ON DELETE CASCADE
+);
+現在您可以將 MemberDetail 表中的 memberdetail_address_id 設置為 commonType 表中相應記錄的 CommonPkey。請注意，CommonPkey 是 commonType 表的主鍵，它將唯一標識每個地址。
+當您需要在 MemberDetail 表中取得地址資料時，可以通過查詢 commonType 表來獲取。例如，如果您想要獲取會員ID為1的地址資料，可以進行如下查詢：
+sql
+Copy code
+SELECT MemberDetail.*, commonType.* 
+FROM MemberDetail 
+JOIN commonType ON MemberDetail.memberdetail_address_id = commonType.CommonPkey 
+WHERE MemberDetail.memberdetail_id_fk = 1;
+這個查詢將返回會員ID為1的所有資訊，包括與 commonType 表關聯的地址資料。
+
+insert into MemberDetail(gender,nick_name,memberdetail_img_url,memberdetail_address,memberdetail_mobile)
+values
+('male','東東','thisisaphotourl','敦化南路一段100號','0943851740');
+如何讓memberdetail_address資料串連至commonType
+ChatGPT
+要將 memberdetail_address 資料串聯至 commonType 表，您需要首先確保 memberdetail_address 的資料在 commonType 表中有相應的對應，並且 memberdetail_address_id 可以參考到 commonType 表中的記錄。
+
+您需要執行以下步驟：
+
+確保 commonType 表中已經存在了您要關聯的地址資料，例如 '敦化南路一段100號'。
+在 commonType 表中，使用 CodeType 欄位來標識地址的類型，例如 'x' 或 'y'。
+確保 MemberDetail 表中的 memberdetail_address_id 可以參考到 commonType 表中對應的記錄。
+讓我們假設 '敦化南路一段100號' 是一個 'x' 類型的地址。那麼您需要確保在 commonType 表中存在一個對應的記錄，例如：
+
+sql
+Copy code
+INSERT INTO commonType (CodeType, commonType_code, CodeTypeDesc)
+VALUES ('x', 1, '敦化南路一段100號');
+接著，當您想要將會員詳細資料插入 MemberDetail 表時，您需要將 memberdetail_address_id 設置為對應於 '敦化南路一段100號' 的 commonType 表中的主鍵值。您可以通過查詢 commonType 表來獲取這個主鍵值，然後將其插入 MemberDetail 表中。
+
+最後，您的插入語句應該類似於：
+
+sql
+Copy code
+INSERT INTO MemberDetail (gender, nick_name, memberdetail_img_url, memberdetail_address_id, memberdetail_mobile)
+VALUES ('male', '東東', 'thisisaphotourl', (SELECT CommonPkey FROM commonType WHERE CodeType = 'x' AND CodeTypeDesc = '敦化南路一段100號'), '0943851740');
+這樣做可以確保 MemberDetail 表中的地址資料與 commonType 表中的相應記錄相關聯。
