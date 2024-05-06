@@ -9,23 +9,11 @@ employee_password varchar(70)
 );
 create table EmployeeDetail(
 employeedetail_id_fk int not null primary key auto_increment,
-employeedetail_code_type varchar(50) ,
-employeedetail_code_type_id varchar(50)not null default 'default avatar',-- 可以不放大頭貼，若不放會顯示一個預設圖示
+employeedetail_imgurl varchar(50)not null default 'default avatar',-- 可以不放大頭貼，若不放會顯示一個預設圖示
 employeedetail_created_date timestamp default current_timestamp,
 employeedetail_update_at timestamp default current_timestamp on update current_timestamp,
 foreign key(employeedetail_id_fk) references Employees(employee_id) on delete cascade-- 基本表被刪,細節表內同筆id也被刪
 );
-create table EmployeeFunctions(
-employeefunctions_id_fk int not null,
-employeefunctions_code_type varchar(50) not null,
-employeefunctions_code_type_id varchar(50) not null,
-foreign key (employeefunctions_id_fk) references EmployeeDetail(employeedetail_id_fk) on delete cascade
- );
- -- drop table Employees;
- -- drop table EmployeeFunctions;
- -- drop table EmployeeDetail;
--- drop database my_project;
-show warnings;
 
 -- 填入資料 Employees(正常版)
 insert into Employees(employee_name,employee_email,employee_password)
@@ -44,39 +32,60 @@ select * from Employees;
 -- 會出現報錯
 
 -- 填入資料(EmployeeDetail) 有頭貼   (資料類型:員工照片,該資料型別內的子id編號)
-insert into EmployeeDetail(employeedetail_code_type,employeedetail_code_type_id)
-values('employee_avatars','01'),('employee_avatars','02'),('employee_avatars','03');
+insert into EmployeeDetail(employeedetail_id_fk ,employeedetail_imgurl)
+values(1,'employee_avatars'),(2,'employee_avatars'),(3,'employee_avatars');
 -- 填入資料 (EmployeeDetail)無頭貼
-insert into EmployeeDetail(employeedetail_code_type)
-values('employee_avatars'),('employee_avatars');
+insert into EmployeeDetail(employeedetail_id_fk)
+values(4),(5);
 select * from EmployeeDetail;
 
--- 填入資料(EmployeeFunctions)  (資料類型:員工權限,該資料型別內的子id編號)
-insert into EmployeeFunctions(employeefunctions_id_fk,employeefunctions_code_type,employeefunctions_code_type_id)
-values
-(1,'functions','01'),
-(2,'functions','02'),
-(3,'functions','03'),
-(4,'functions','04'),
-(5,'functions','05');
-select * from EmployeeFunctions;
+ -- 權限表
+ create table Functions(
+ function_id int not null primary key auto_increment,
+ function_employee_id int,
+ function_name varchar(50) not null,
+ foreign key (function_employee_id) references EmployeeDetail(employeedetail_id_fk) on delete cascade
+ );
+
+-- 填入資料Functions(製作權限表)
+insert into functions(function_employee_id,function_name)
+values(1,'admin'),(2,'creat'),(3,'read'),(4,'update'),(5,'delete');
+select * from Functions;
+show warnings;
+
+-- 員工與權限表的關係
+-- create table EmployeeFunctions(
+-- employeefunctions_id_fk int not null,
+-- employeefunctions varchar(50) not null,
+-- primary key (employeefunctions_id_fk,employeefunctions),
+-- foreign key (employeefunctions_id_fk) references employeedetail(employeedetail_id_fk) on delete cascade
+--  );
+ 
+ -- drop table Employees;
+ -- drop table EmployeeFunctions;
+ -- drop table EmployeeDetail;
+ -- drop database my_project;
+show warnings;
+
+-- 填入資料(EmployeeFunctions) 
+-- insert into EmployeeFunctions(employeefunctions_id_fk,employeefunctions)
+-- values
+-- (1,'1'),
+-- (2,'2'),
+-- (3,'3'),
+-- (4,'4'),
+-- (5,'5');
+-- select * from EmployeeFunctions;
+show warnings;
 
 
 -- join資料(細節表中呈現 >員工基本資料+權限表)
-select * 
+select *
 from EmployeeDetail
-join Employees on EmployeeDetail.employeedetail_id_fk=Employees.employee_id 
-join EmployeeFunctions on EmployeeDetail.employeedetail_id_fk=EmployeeFunctions.employeefunctions_id_fk
-join CommonCode on CommonCode.code_type=EmployeeFunctions.employeefunctions_code_type;
+join Employees on EmployeeDetail.employeedetail_id_fk=Employees.employee_id
+join Functions on function_employee_id=employeedetail_id_fk;
 
--- select sample
-select * 
-from EmployeeDetail 
-join Employees on EmployeeDetail.employeedetail_id_fk=Employees.employee_id 
-join EmployeeFunctions on EmployeeFunctions.employeeFunctions_code_type_id=EmployeeFunctions.employeefunctions_id_fk
-join CommonCode on CommonCode.code_type=EmployeeFunctions.employeefunctions_code_type
 
-where employeedetail_id_fk=3 and code_type_id=3 and EmployeeFunctions_id_fk=3;
 
 
 
