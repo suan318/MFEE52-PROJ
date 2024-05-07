@@ -24,7 +24,7 @@ values
 ('林志宇','emailgenie89@gmail.com','user3'),
 ('鄭婷婷','examplemail567@gmail.com','user4'),
 ('楊子翔','quickmail1234@gmail.com','user5');
-select * from Employees;
+
 -- 填入資料(故意重複mail)
 -- insert into Employees(employee_name,employee_email,employee_password)
 -- values 
@@ -38,53 +38,35 @@ values(1,'employee_avatars'),(2,'employee_avatars'),(3,'employee_avatars');
 -- 填入資料 (EmployeeDetail)無頭貼
 insert into EmployeeDetail(employeedetail_id_fk)
 values(4),(5);
-select * from EmployeeDetail;
-show warnings;
+
  -- 權限表
  create table Functions(
  function_id int not null primary key auto_increment,
- function_employee_id int,
- function_name varchar(50) not null,
- foreign key (function_employee_id) references EmployeeDetail(employeedetail_id_fk) on delete cascade
+ function_name varchar(50) not null
  );
-
 -- 填入資料Functions(製作權限表)
-insert into functions(function_employee_id,function_name)
-values(1,'admin'),(2,'creat'),(3,'read'),(4,'update'),(5,'delete');
-select * from Functions;
-show warnings;
+insert into functions(function_name)
+values('admin'),('creat'),('read'),('update'),('delete');
 
--- 員工與權限表的關係
--- create table EmployeeFunctions(
--- employeefunctions_id_fk int not null,
--- employeefunctions varchar(50) not null,
--- primary key (employeefunctions_id_fk,employeefunctions),
--- foreign key (employeefunctions_id_fk) references employeedetail(employeedetail_id_fk) on delete cascade
---  );
- 
- -- drop table Employees;
- -- drop table EmployeeFunctions;
- -- drop table EmployeeDetail;
- -- drop database my_project;
-show warnings;
-
--- 填入資料(EmployeeFunctions) 
--- insert into EmployeeFunctions(employeefunctions_id_fk,employeefunctions)
--- values
--- (1,'1'),
--- (2,'2'),
--- (3,'3'),
--- (4,'4'),
--- (5,'5');
--- select * from EmployeeFunctions;
-show warnings;
+ -- 員工權限表
+ create table EmployeeFunctions(
+ EmployeeFunctions_id_fk int,
+ functions_id_fk int,
+ foreign key (EmployeeFunctions_id_fk) references Employees(employee_id),
+ foreign key (functions_id_fk) references Functions(function_id)
+ );
+-- 填入資料EmployeeFunctions
+insert into EmployeeFunctions(EmployeeFunctions_id_fk,functions_id_fk)
+values(1,1),(2,2),(3,3),(4,4),(5,5);
 
 
 -- join資料(細節表中呈現 >員工基本資料+權限表)
 select *
 from EmployeeDetail
 join Employees on EmployeeDetail.employeedetail_id_fk=Employees.employee_id
-join Functions on function_employee_id=employeedetail_id_fk;
+join EmployeeFunctions on EmployeeFunctions_id_fk=employeedetail_id_fk
+join Functions ON EmployeeFunctions.functions_id_fk = Functions.function_id;
+
 
 
 
